@@ -36,7 +36,7 @@ Other installed launchable apps follow these preferred entries.
 Use exactly the five selected images: archer battlefield, royal-costume portrait, Salaar-style action image, crouched battlefield image, and the wide FAUZI “Rebel Soldier” poster. Do not include the earlier vertical “File No. 025” medallion poster. Store locally, optimize for 16:9 display, preserve important poster content where practical, and avoid loading all wallpapers into memory at once.
 
 ## Startup logo
-- Show the supplied UNNAMED eclipse wordmark full-screen on black for approximately one second when Home is entered, then reveal the launcher.
+- Show the user-provided Prabhas collage image full-screen on black for approximately one second when Home is entered, then reveal the launcher.
 - No audio, video, network request, or heavy effects.
 - Verify on the actual TV whether pressing Home while already on Home delivers a new intent/event. Some firmware may need a separate opt-in key helper; do not assume this behavior works until tested.
 
