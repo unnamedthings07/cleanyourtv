@@ -7,10 +7,10 @@ Status: Home-screen foundation in progress. This file is the agreed product base
 - CleanYourTV's matching device entry identifies the Karbonn/Skyworth SW4H variant as Android TV 10 (API 29), 32-bit ARM with about 1.68 GB RAM. Verify the exact running firmware with ADB before installing or switching Home.
 
 ## Product goal
-Build a clean, lightweight, native Android TV launcher branded **UNNAMED**, using six locally stored user-provided Prabhas / FAUZI wallpapers. Keep the existing CleanYourTV setup, debloat scripts, and restore tooling safe and unchanged.
+Build a clean, lightweight, native Android TV launcher branded **UNNAMED**, using five locally stored user-provided Prabhas / FAUZI wallpapers. Keep the existing CleanYourTV setup, debloat scripts, and restore tooling safe and unchanged.
 
 ## Home screen
-- Full-screen, static wallpaper chosen randomly on every genuine Home entry.
+- Full-screen, static wallpaper chosen randomly from the five selected images on every genuine Home entry.
 - Avoid selecting the same wallpaper twice in a row when at least two wallpapers are available.
 - No slideshow, video backgrounds, network content requests, recommendations, sponsored tiles, streaming-content rows, analytics, or unnecessary background services.
 - Top header matching the user's reference: UNNAMED wordmark, greeting, clock/date, and three compact glass-style controls: Inputs, Wi-Fi/network, Settings.
@@ -33,7 +33,7 @@ When present on the TV, sort these apps first in exactly this order:
 Other installed launchable apps follow these preferred entries.
 
 ## Wallpapers
-Use the six images the user selected/provided: the archer image, royal-costume portrait, Salaar action image, crouched battlefield image, wide FAUZI poster, and the vertical FAUZI “File No. 025” medallion poster. Store locally, optimize for 16:9 display, preserve important poster content where practical, and avoid loading all wallpapers into memory at once.
+Use exactly the five selected images: archer battlefield, royal-costume portrait, Salaar-style action image, crouched battlefield image, and the wide FAUZI “Rebel Soldier” poster. Do not include the earlier vertical “File No. 025” medallion poster. Store locally, optimize for 16:9 display, preserve important poster content where practical, and avoid loading all wallpapers into memory at once.
 
 ## Startup logo
 - Show the supplied UNNAMED eclipse wordmark full-screen on black for approximately one second when Home is entered, then reveal the launcher.
