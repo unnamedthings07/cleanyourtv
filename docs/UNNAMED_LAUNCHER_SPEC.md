@@ -16,8 +16,9 @@ Build a clean, lightweight, native Android TV launcher branded **UNNAMED**, usin
 - Top header matching the user's reference: UNNAMED wordmark, greeting, clock/date, and three larger reference-matched glass-style controls: Inputs, Wi-Fi/network, Settings.
 - Four-column main dock close to the bottom, matching the user's reference: large rounded rectangular app artwork, consistent dimensions/spacing, dark translucent rounded dock band, and a subtle crisp focus rim/lift.
 - Show the focused app's name in large type above the dock. Do not put app captions under every tile.
+- The six preferred apps occupy a two-row main dock: four on the first row, the remaining two centered on the second. The translucent dark outline surrounds only this main dock; other installed apps follow alphabetically from the third row without that band.
 - A small portion of the next icon row peeks into view at the bottom.
-- D-pad Down scrolls rows upward into view; D-pad Up returns toward the prior row. Left/Right moves across the current six-column row. Navigation must be deterministic.
+- D-pad Down scrolls rows upward into view; D-pad Up returns toward the prior row. Left/Right moves across the current four-column row. Navigation must be deterministic.
 - Wallpaper stays unchanged throughout one Home visit, including row navigation and launcher-owned UI.
 - Discover apps installed locally and launch them with OK. Do not fabricate app tiles for missing apps.
 
