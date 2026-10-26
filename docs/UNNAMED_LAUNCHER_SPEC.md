@@ -4,7 +4,7 @@ Status: Home-screen foundation in progress. This file is the agreed product base
 
 ## Target device
 - TV model supplied by the user: **SWTV-20AE**.
-- Android version / SDK level and Home-key behavior must be measured on the actual TV before choosing the final compatibility approach.
+- CleanYourTV's matching device entry identifies the Karbonn/Skyworth SW4H variant as Android TV 10 (API 29), 32-bit ARM with about 1.68 GB RAM. Verify the exact running firmware with ADB before installing or switching Home.
 
 ## Product goal
 Build a clean, lightweight, native Android TV launcher branded **UNNAMED**, using six locally stored user-provided Prabhas / FAUZI wallpapers. Keep the existing CleanYourTV setup, debloat scripts, and restore tooling safe and unchanged.
