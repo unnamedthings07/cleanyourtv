@@ -13,12 +13,12 @@ Build a clean, lightweight, native Android TV launcher branded **UNNAMED**, usin
 - Full-screen, static wallpaper chosen randomly from the five selected images on every genuine Home entry.
 - Avoid selecting the same wallpaper twice in a row when at least two wallpapers are available.
 - No slideshow, video backgrounds, network content requests, recommendations, sponsored tiles, streaming-content rows, analytics, or unnecessary background services.
-- Top header matching the user's reference: UNNAMED wordmark, greeting, clock/date, and three larger reference-matched glass-style controls: Inputs, Wi-Fi/network, Settings.
+- Top header matching the user's reference: UNNAMED wordmark, greeting, clock/date, and three larger reference-matched glass-style controls: Inputs, Wi-Fi/network, Settings. Enlarge the clock, buttons, icons and button labels while keeping app-tile dimensions independent.
 - Four-column main dock close to the bottom, matching the user's reference: large rounded rectangular app artwork, consistent dimensions/spacing, dark translucent rounded dock band, and a subtle crisp focus rim/lift.
 - Show the focused app's name in large type above the dock. Do not put app captions under every tile.
 - The six preferred apps occupy a two-row main dock: four on the first row, the remaining two centered on the second. The translucent dark outline surrounds only this main dock; other installed apps follow alphabetically from the third row without that band.
-- A small portion of the next icon row peeks into view at the bottom.
-- D-pad Down scrolls rows upward into view; D-pad Up returns toward the prior row. Left/Right moves across the current four-column row. Navigation must be deterministic.
+- Only the first favorites row has the translucent dark rounded outline and it follows that row while scrolling. The second favorites row and later alphabetically sorted rows are unbanded. A small portion of a later row peeks into view at the bottom.
+- D-pad Down scrolls rows upward into view; D-pad Up returns toward the prior row. Left/Right moves across the current four-column visual row; empty side cells in the centered second favorites row are skipped. Navigation must be deterministic.
 - Wallpaper stays unchanged throughout one Home visit, including row navigation and launcher-owned UI.
 - Discover apps installed locally and launch them with OK. Do not fabricate app tiles for missing apps.
 
