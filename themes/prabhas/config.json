@@ -1,0 +1,32 @@
+{
+  "columns": 6,
+  "rows_below_dock": 1,
+  "background_color": "#0B0604",
+
+  "wallpaper": true,
+  "wallpaper_rotation_minutes": 1440,
+  "wallpaper_order": "sequential",
+  "wallpaper_dim": 30,
+
+  "glass_style": "glass",
+  "dock_band": true,
+  "dock_glass": true,
+  "dock_opacity": 70,
+  "dock_title": true,
+  "app_glow": true,
+  "ambient_glow": false,
+  "header_white": true,
+
+  "show_inputs_pill": true,
+  "wifi_status_color": true,
+  "tile_menu": true,
+
+  "animations": true,
+  "reduced_motion": true,
+  "focus_overshoot": false,
+
+  "splash": true,
+  "wallpaper_on_home": true,
+  "brand_text": "UNNAMED",
+  "wifi_full_name": true
+}

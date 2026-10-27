@@ -26,7 +26,7 @@ final class Look {
     static final int MAX_TEXT = 60;
     static final int MAX_NICKNAME = 32;
     /** Seconds the screen stays up; 0 is until Back or OK. */
-    static final int[] DURATIONS = {3, 5, 10, 15, 30, 0};
+    static final int[] DURATIONS = {1, 3, 5, 10, 15, 30, 0};
     static final String[] COLOR_NAMES = {"Black", "Charcoal", "Midnight", "Forest", "Wine", "White"};
     static final int[] COLORS = {0xFF000000, 0xFF1C1C1E, 0xFF0B1A33, 0xFF0E2A1F, 0xFF2A0E16, 0xFFFFFFFF};
 
@@ -38,7 +38,7 @@ final class Look {
     String text = "Welcome";
     Place place = Place.BOTTOM;
     int color = 0;
-    int seconds = 5;
+    int seconds = 1;
     String nickname = "";
 
     static Look load(Store s) {

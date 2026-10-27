@@ -1,0 +1,91 @@
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
+index 880d15f..1112acd 100644
+--- a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
+@@ -134,6 +134,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+     private RecyclerView grid;
+     private FrameLayout root;
+     private WallpaperPlayer wallpaperPlayer;
++    /** Theme key splash: the logo shown for about a second each time Home is pressed; null when off. */
++    private HomeSplash homeSplash;
+     private GlassView glass;
+     private View ambient;
+     private TextView heroName;
+@@ -417,6 +419,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         // the theme's background, so launch looks the same.
+         getWindow().setBackgroundDrawable(null);
+         wallpaperPlayer = new WallpaperPlayer(this, root, cfg);
++        ThemeExtras extras = ThemeExtras.load(this);
++        if (extras.splash) {
++            homeSplash = new HomeSplash(this, root);
++            if (savedInstanceState == null) root.post(homeSplash::show);
++        }
+         sky = findViewById(R.id.sky);
+         sky.setIntensity(cfg.skyIntensity);
+         glass = findViewById(R.id.glass);
+@@ -447,6 +454,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         // still follows the dock.
+         if (!cfg.dockTitle) hero.setVisibility(View.GONE);
+         greeting = findViewById(R.id.greeting);
++        ThemeExtras.load(this).addBrand(greeting, density);
+         clockBlock = findViewById(R.id.leftBlock);
+         greetingColor = greeting.getCurrentTextColor();
+         if (!cfg.showGreeting) greeting.setVisibility(View.GONE);
+@@ -720,6 +728,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         iconOnlyButtons = cfg.iconOnlyButtons;
+         topMenu = cfg.topMenu;
+         wifiIconOnly = iconOnlyButtons && cfg.wifiLabelWidth <= 0;
++        if (!iconOnlyButtons && ThemeExtras.load(this).wifiFullName) btnWifi.setMaxWidth(Math.round(520 * density));
+         if (cfg.wifiStatusColor) {
+             wifiPlainTint = btnWifi.getCompoundDrawableTintList();
+             wifiOnlineTint = getColorStateList(R.color.pill_icon_online);
+@@ -887,6 +896,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         if (openLauncherSettingsIfAsked(intent)) return;
+         if (openInputsIfAsked(intent)) return;
+         if (intent == null || !intent.hasCategory(Intent.CATEGORY_HOME)) return;
++        if (homeSplash != null) homeSplash.show();
+         grid.scrollToPosition(0);
+         lastFocused = 0;
+         lastFocusedKey = adapter.getItemCount() > 0 ? adapter.keyAt(0) : null;
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/WallpaperPlayer.java b/launcher/app/src/main/java/com/gathin/tvhome/WallpaperPlayer.java
+index 8da8dfa..576f821 100644
+--- a/launcher/app/src/main/java/com/gathin/tvhome/WallpaperPlayer.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/WallpaperPlayer.java
+@@ -51,6 +51,10 @@ final class WallpaperPlayer {
+     private boolean active;
+     private boolean closed;
+     private boolean loading;
++    /** theme key wallpaper_on_home: every return to Home moves to the next picture instead of waiting for the interval. */
++    private final boolean changeOnHome;
++    private boolean started;
++    private boolean advance;
+     private String displayed = "";
+     /** wallpaper_captions: the shown picture's name from wallpapers/captions.txt; null when off or there are none. */
+     private final TextView caption;
+@@ -71,6 +75,7 @@ final class WallpaperPlayer {
+         // The dim is painted into the picture (decode), so no full-screen shade layer is drawn on every frame.
+         dimColor = config.wallpaperDim > 0 ? (config.wallpaperDim * 255 / 100) << 24 : 0;
+         order = config.wallpaperOrder;
++        changeOnHome = ThemeExtras.load(context).wallpaperOnHome;
+         preferences = context.getSharedPreferences("wallpaper_rotation", Context.MODE_PRIVATE);
+         moods = config.wallpaperMoods;
+         latitude = moods.isEmpty() ? "" : context.getString(R.string.latitude);
+@@ -129,6 +134,8 @@ final class WallpaperPlayer {
+     }
+ 
+     void start() {
++        if (changeOnHome && started) advance = true;
++        started = true;
+         active = true;
+         update();
+     }
+@@ -172,7 +179,8 @@ final class WallpaperPlayer {
+         List<File> playable = playable();
+         File selected = WallpaperRotation.find(playable, previous);
+         long changed = preferences.getLong("changed", 0);
+-        if (selected == null || WallpaperRotation.due(changed, System.currentTimeMillis(), interval)) {
++        if (selected == null || advance || WallpaperRotation.due(changed, System.currentTimeMillis(), interval)) {
++            advance = false;
+             selected = WallpaperRotation.pick(playable, previous, order, random);
+         }
+         if (selected == null || selected.getName().equals(displayed)) return;

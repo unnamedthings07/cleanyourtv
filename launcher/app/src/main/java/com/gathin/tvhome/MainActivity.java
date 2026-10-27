@@ -134,6 +134,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private RecyclerView grid;
     private FrameLayout root;
     private WallpaperPlayer wallpaperPlayer;
+    private HomeSplash homeSplash;
     private GlassView glass;
     private View ambient;
     private TextView heroName;
@@ -417,6 +418,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // the theme's background, so launch looks the same.
         getWindow().setBackgroundDrawable(null);
         wallpaperPlayer = new WallpaperPlayer(this, root, cfg);
+        ThemeExtras extras = ThemeExtras.load(this);
+        if (extras.splash) {
+            homeSplash = new HomeSplash(this, root);
+            if (savedInstanceState == null) root.post(homeSplash::show);
+        }
         sky = findViewById(R.id.sky);
         sky.setIntensity(cfg.skyIntensity);
         glass = findViewById(R.id.glass);
@@ -447,6 +453,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // still follows the dock.
         if (!cfg.dockTitle) hero.setVisibility(View.GONE);
         greeting = findViewById(R.id.greeting);
+        ThemeExtras.load(this).addBrand(greeting, getResources().getDisplayMetrics().density);
         clockBlock = findViewById(R.id.leftBlock);
         greetingColor = greeting.getCurrentTextColor();
         if (!cfg.showGreeting) greeting.setVisibility(View.GONE);
@@ -571,7 +578,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             public void onChildViewDetachedFromWindow(@NonNull View v) {
             }
         });
-        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding, cfg.dockBand,
+        int dockCount = Math.max(COLUMNS, cfg.dockApps.size());
+        if (dockRow) grid.addItemDecoration(new DockDecoration(dockCount, density, cinematic, cfg.alwaysShowNames, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding, cfg.dockBand,
                 singleRow, cfg.dockBandAll));
         if (cfg.fadeRows) TopFade.attach(grid, 48 * density);
         // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
@@ -579,12 +587,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             grid.setLayoutAnimation(new LayoutAnimationController(
                     AnimationUtils.loadAnimation(this, R.anim.tile_enter), 0.06f));
         }
-        adapter = new AppAdapter(this, this, COLUMNS, cfg);
+        adapter = new AppAdapter(this, this, dockCount, cfg);
         dockApps = cfg.dockApps;
         fillDockLeavesSlots = !cfg.fillDock;
         Order savedOrder = Order.load(Order.file(this));
         adapter.setSavedOrder(Order.ranks(savedOrder, dockApps), Order.docked(savedOrder, dockApps));
         grid.setAdapter(adapter);
+
+        if (savedInstanceState == null) {
+            try {
+                ComponentName welcome = new ComponentName(
+                        "io.github.maxhayim.startupbranding",
+                        "io.github.maxhayim.startupbranding.Welcome");
+                Intent brandIntent = new Intent();
+                brandIntent.setComponent(welcome);
+                brandIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(brandIntent);
+            } catch (Exception ignored) {
+            }
+        }
 
         // tvOS layout: push the dock row towards the bottom of the screen, leaving room for
         // rows_below_dock grid rows under it; the rest of the grid stays below until you press Down.
@@ -594,13 +615,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // Item height follows the tile size, which follows the columns and the rows that must fit (AppAdapter.tileWidthPx).
             int inner = (r - l) - grid.getPaddingLeft() - grid.getPaddingRight();
             int tileW = AppAdapter.tileWidthPx(inner, h, COLUMNS, rowsBelowDock, cfg.dockTitle, cfg.dockRow, density);
-            int itemH = AppAdapter.itemHeightPx(AppAdapter.tileHeightPx(tileW), density);
-            int dockRow = itemH + (int) (AppAdapter.DOCK_EXTRA_DP * density);   // item height plus DockDecoration offsets
-            int gridRows = itemH * rowsBelowDock;
-            // Keep the hero below the header when the library is enabled on a short screen,
-            // even when the theme requests an extra visible row below the dock.
+            int tileH = AppAdapter.tileHeightPx(tileW);
+            int dockRowsCount = (dockCount + COLUMNS - 1) / COLUMNS;
+            // Dock tiles have no text label under them (label is GONE), so each dock row is tileH + padding
+            int dockItemH = tileH + Math.round(22 * density);
+            int dockHeight = dockRowsCount * dockItemH + Math.round(12 * density);
+            int bottomMargin = Math.round(24 * density);
             int shelfClearance = cfg.appLibrary ? hero.getMeasuredHeight() + (int) (40 * density) : 0;
-            int want = Math.max(shelfClearance, h - dockRow - gridRows - (int) (AppAdapter.BOTTOM_ROOM_DP * density));
+            int want = Math.max(shelfClearance, h - dockHeight - bottomMargin);
             // Where the rows cannot fit even at the smallest tile (3 rows with the title on), the title keeps its
             // room above the dock and the last rows run off the bottom instead of the title drawing over the clock.
             if (MainActivity.this.dockRow && cfg.dockTitle && rowsBelowDock > 0) want = Math.max(want, (int) (AppAdapter.TITLE_ROOM_DP * density));
@@ -720,6 +742,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         iconOnlyButtons = cfg.iconOnlyButtons;
         topMenu = cfg.topMenu;
         wifiIconOnly = iconOnlyButtons && cfg.wifiLabelWidth <= 0;
+        if (!iconOnlyButtons && ThemeExtras.load(this).wifiFullName) btnWifi.setMaxWidth(Math.round(520 * getResources().getDisplayMetrics().density));
         if (cfg.wifiStatusColor) {
             wifiPlainTint = btnWifi.getCompoundDrawableTintList();
             wifiOnlineTint = getColorStateList(R.color.pill_icon_online);
@@ -887,6 +910,21 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (openLauncherSettingsIfAsked(intent)) return;
         if (openInputsIfAsked(intent)) return;
         if (intent == null || !intent.hasCategory(Intent.CATEGORY_HOME)) return;
+        // Show the startup branding screen when returning to Home from an external source (AV, HDMI, app).
+        if (stopped) {
+            try {
+                ComponentName welcome = new ComponentName(
+                        "io.github.maxhayim.startupbranding",
+                        "io.github.maxhayim.startupbranding.Welcome");
+                Intent brandIntent = new Intent();
+                brandIntent.setComponent(welcome);
+                brandIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(brandIntent);
+            } catch (Exception ignored) {
+                // Branding addon not installed — skip silently.
+            }
+        }
+        if (homeSplash != null) homeSplash.show();
         grid.scrollToPosition(0);
         lastFocused = 0;
         lastFocusedKey = adapter.getItemCount() > 0 ? adapter.keyAt(0) : null;
@@ -1647,10 +1685,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             springY.animateToFinalPosition(y - glassScrollShift);
         }
         View item = (View) card.getParent();
-        if (dockRow && (singleRow || position < COLUMNS)) {
+        int dockCount = Math.max(COLUMNS, dockApps.size());
+        if (dockRow && (singleRow || position < dockCount)) {
             // Dock: park it at the bottom of the screen and show the top shelf for this app. In a single row
             // every tile is in the dock's row, which never scrolls vertically.
-            int decoratedTop = item.getTop() - (int) (6 * density);
+            RecyclerView.ViewHolder vh0 = grid.findViewHolderForAdapterPosition(0);
+            View topItem = vh0 != null ? vh0.itemView : item;
+            int decoratedTop = topItem.getTop() - (int) (6 * density);
             int dy = decoratedTop - grid.getPaddingTop();
             // A 1px mismatch used to start a scroll on every dock move. Only scroll when the row is
             // actually off; reduced motion does it in one jump so it does not fight the highlight.
@@ -1659,7 +1700,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 if (!animations || reducedMotion) grid.scrollBy(0, dy);
                 else grid.smoothScrollBy(0, dy);
             }
-            showHero(position, scroll ? r.top - dy : r.top);
+            Rect topR = new Rect();
+            root.offsetDescendantRectToMyCoords(topItem, topR);
+            showHero(position, scroll ? topR.top - dy : topR.top);
         } else {
             // Below the dock (or in a plain grid) the glow follows the tile without the big name; letting it
             // fade out left the grid on plain black.
@@ -3210,7 +3253,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         LinearLayout rows = panel.findViewById(R.id.rows);
         PopupWindow popup = glassPopup(panel, (int) (200 * density));
         if (dockRow && position < adapter.movableCount()) {
-            boolean inDock = position < COLUMNS;
+            int dockCount = Math.max(COLUMNS, dockApps.size());
+            boolean inDock = position < dockCount;
             addSettingsMenuRow(rows, popup, inDock ? R.string.tile_replace_in_dock : R.string.tile_add_to_dock,
                     () -> startDockEditFor(key, inDock));
         }
